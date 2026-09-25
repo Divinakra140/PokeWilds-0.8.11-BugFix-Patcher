@@ -71,7 +71,7 @@ applied exactly as expected. Your original is always kept.
 # For developers
 
 Building this into a port (Android, PortMaster, ROCKNIX and so on)? See [PORTING.md](PORTING.md) and the
-`v1.0-for-port-devs.zip` download.
+[v1.0-for-port-devs.zip](https://github.com/Divinakra140/PokeWilds-0.8.11-BugFix-Patcher/releases/download/1.0/v1.0-for-port-devs.zip) download.
 
 ## Patcher options
 
