@@ -20,13 +20,16 @@ By Divinakra
 
 You need Java, the same one you use to run the game.
 
-1. **Download** `PokeWilds-BugFix-v1.0.zip` from the [Releases](../../releases) page and unzip it anywhere.
+1. **Download** `PokeWilds-BugFix-v1.0.zip` from the [Releases](../../releases) page.
 2. **Get the official game.** Download `pokewilds-otherplatforms.zip` from the
-   [PokeWilds v0.8.11 release](https://github.com/SheerSt/pokewilds/releases/tag/v0.8.11) and unzip it, or use the
-   `app\pokewilds.jar` from a copy of the game you already have. It must be the original, unmodified 0.8.11 jar.
-3. **Drag `pokewilds.jar` onto `Patch PokeWilds (Windows, drag and drop).bat`.** It takes a minute or two.
+   [PokeWilds v0.8.11 release](https://github.com/SheerSt/pokewilds/releases/tag/v0.8.11) and unzip it, or use a copy of
+   the game you already have. It must be the original, unmodified 0.8.11 game.
+3. **Unzip the contents of the patcher zip straight into the game's `app` folder**, the folder that contains
+   `pokewilds.jar`. You should end up with `bugfix.jar`, the two `.bat` files and the README sitting right next to
+   `pokewilds.jar`.
+4. **Drag `pokewilds.jar` onto `Patch PokeWilds (Windows, drag and drop).bat`.** It takes a minute or two.
    The window ends with `Done. pokewilds.jar is now the patched game.`
-4. **Play as usual.** Your original is kept next to it as `pokewilds-original.jar.bak`.
+5. **Play as usual.** Your original is kept next to it as `pokewilds-original.jar.bak`.
 
 **To undo:** drag the patched `pokewilds.jar` onto `Restore original PokeWilds (Windows, drag and drop).bat`.
 Your original comes back, and the patched one is kept as `pokewilds-bugfix.jar`.
@@ -34,6 +37,7 @@ Your original comes back, and the patched one is kept as `pokewilds-bugfix.jar`.
 ### macOS and Linux
 
 ```sh
+# run these in the folder that contains pokewilds.jar and bugfix.jar
 java -jar bugfix.jar pokewilds.jar               # patch in place (keeps pokewilds-original.jar.bak)
 java -jar bugfix.jar --restore pokewilds.jar     # undo
 java -jar bugfix.jar in.jar out.jar              # write a patched copy and leave the input alone
