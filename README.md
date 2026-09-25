@@ -27,11 +27,11 @@ You need Java, the same one you use to run the game.
 3. **Unzip the contents of the patcher zip straight into the game's `app` folder**, the folder that contains
    `pokewilds.jar`. You should end up with `bugfix.jar`, the two `.bat` files and the README sitting right next to
    `pokewilds.jar`.
-4. **Drag `pokewilds.jar` onto `Patch PokeWilds (Windows, drag and drop).bat`.** It takes a minute or two.
+4. **Drag `pokewilds.jar` onto `Patch PokeWilds.bat`.** It takes a minute or two.
    The window ends with `Done. pokewilds.jar is now the patched game.`
 5. **Play as usual.** Your original is kept next to it as `pokewilds-original.jar.bak`.
 
-**To undo:** drag the patched `pokewilds.jar` onto `Restore original PokeWilds (Windows, drag and drop).bat`.
+**To undo:** drag the patched `pokewilds.jar` onto `Restore original PokeWilds.bat`.
 Your original comes back, and the patched one is kept as `pokewilds-bugfix.jar`.
 
 ### macOS and Linux
@@ -145,8 +145,8 @@ platforms (Android, ROCKNIX).
 | `src/local/pokewilds/bugfix/BugFixAgent.java` | the bytecode patches and the `-javaagent` entry point |
 | `src/local/pokewilds/bugfix/PatchJar.java` | the offline patcher (`java -jar bugfix.jar in out`) |
 | `src/local/pokewilds/bugfix/Hooks.java` | runtime support the patched classes call (per-floor maps, saving, egg floor) |
-| `Patch PokeWilds (Windows, drag and drop).bat` | drag-and-drop patcher on Windows (in place, keeps a backup) |
-| `Restore original PokeWilds (Windows, drag and drop).bat` | puts the original jar back |
+| `Patch PokeWilds.bat` | drag-and-drop patcher on Windows (in place, keeps a backup) |
+| `Restore original PokeWilds.bat` | puts the original jar back |
 | `tools/RelocateAsm.java` | copies ASM into the bugfix package at build time |
 | `tests/` | the checks run by `test.sh` |
 
