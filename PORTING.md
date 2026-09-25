@@ -92,7 +92,7 @@ there is no launcher flag to keep track of. The individual fixes can be switched
 3. Ride, Cut and Build monsters faced the wrong way with modded sprites.
 4. Ho-Oh made every monster near it throw an error each frame.
 
-The save format doesn't change. Details for each fix are in the repository README.
+The save format doesn't change.
 
 ## What I have tested
 

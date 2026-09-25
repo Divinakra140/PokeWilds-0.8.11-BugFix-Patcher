@@ -73,34 +73,6 @@ applied exactly as expected. Your original is always kept.
 Building this into a port (Android, PortMaster, ROCKNIX and so on)? See [PORTING.md](PORTING.md) and the
 `v1.0-for-port-devs.zip` download.
 
-## The four fixes in detail
-
-1. **Monsters on different floors of a building affect each other.**
-   Every floor of an interior is its own tile map, but all monsters (overworld and every floor) live in one map,
-   `PkmnMap.pokemon`, keyed only by position. Monsters on different floors that share coordinates therefore block
-   each other, scan each other, overwrite each other's slot, and hide or freeze each other (a Ho-Oh on floor 10
-   froze monsters on floor 2). The patch gives every tile map its own monster map:
-   - the game's own `pokemon` field is switched to the current floor's map whenever the player changes floor (all 11
-     places that assign `PkmnMap.tiles` are hooked), so player, drawing and UI code run unchanged on a normal
-     one-floor map; the drawn-monster list and tile cache are rebuilt on a change;
-   - code that belongs to a monster uses that monster's own floor; world-level code (day/night spawning, world
-     generation) uses the overworld or all floors;
-   - a monster is registered in exactly one place, so leftover registrations ("trails") cannot pile up;
-   - saving: the save file is keyed by position only, so a monster whose position is already taken by one from
-     another floor is written to the nearest free tile of its own floor. Nothing is dropped. The save format is
-     unchanged.
-2. **Eggs laid on upper floors reload on the first floor.** `Network.PokemonDataV07(Pokemon)` saves
-   `pokemon.interiorIndex`, which is only kept up to date for monsters the player dropped; a new egg keeps the
-   default 100 (the first floor). The patch saves the index of the tile map the monster is really on. Eggs that are
-   already in a save on the wrong floor stay there.
-3. **Cut / Ride / Build monsters face sideways when moving up or down** with per-species mod sprites
-   (`mods/pokemon/<name>/overworld.png`, a vertical 16x96 strip). `DrawPlayerUpper/Lower` force the drawn region's Y
-   from `player.spriteOffsetY`, which vertical mod sheets never set. The patch uses the sprite's own region Y, which
-   is identical for the built-in sheet. Popular mods such as the 3rd Gen Overhaul are affected by the bug.
-4. **`ho_oh` missing from `Pokemon.baseSpecies`.** The table is keyed from `evos_attacks.asm` headers
-   (`HoOhEvosAttacks:` becomes `hooh`) but the species is `ho_oh`, so every monster near Ho-Oh threw a
-   `NullPointerException` each frame and stopped updating. The patch adds the missing entry.
-
 ## Patcher options
 
 `--no-sprites`, `--no-hooh`, `--no-floors`, `--no-eggs` leave individual fixes out. The patcher also prints a **patch
