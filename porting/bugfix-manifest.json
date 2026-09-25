@@ -1,0 +1,61 @@
+{
+  "name": "PokeWilds 0.8.11 Bug Fix Patcher",
+  "version": "1.0",
+  "supported_game_version": "0.8.11",
+  "official_release": {
+    "page": "https://github.com/SheerSt/pokewilds/releases/tag/v0.8.11",
+    "asset": "pokewilds-otherplatforms.zip",
+    "asset_sha256": "5c0aca7f447ee6b4ed587f3ab2cefaf445219059d790862a7121c56a72fb22ba"
+  },
+  "input_requirements": {
+    "file": "pokewilds.jar",
+    "class_sha256": {
+      "com/pkmngen/game/PkmnMap.class": "7e7317c4f1b6373fbb1129c43a027230e7943d2ea87762a2c8a8d4776a0a8dc9",
+      "com/pkmngen/game/Pokemon.class": "84daae5ce3b6a53341ef20a213c32b7d25991c4a2fa878c1896a129a59bdc6e4"
+    },
+    "tested_jar_sha256": "0a72e17bf5cc3bd14ac97a6d001fe16c32cf8bd2d6caf1271bb2d3f234a6f248",
+    "note": "The patcher accepts a jar if these two class files match. tested_jar_sha256 is the whole jar the fixes were tested with."
+  },
+  "tool": {
+    "file": "bugfix.jar",
+    "patcher_main_class": "local.pokewilds.bugfix.PatchJar",
+    "agent_class": "local.pokewilds.bugfix.BugFixAgent",
+    "min_java": 8,
+    "min_heap_mb": 32,
+    "recommended_heap_mb": 64,
+    "measured_seconds": 20,
+    "measured_on": "desktop, Java 17",
+    "disk": "output is about the size of the input jar (about 148 MB); a temporary file of that size exists next to the output while it is written"
+  },
+  "commands": {
+    "patch_to_new_file": "java -jar bugfix.jar <official.jar> <output.jar>",
+    "patch_in_place": "java -jar bugfix.jar <pokewilds.jar>   (keeps pokewilds-original.jar.bak)",
+    "restore": "java -jar bugfix.jar --restore <pokewilds.jar>",
+    "options": [
+      "--no-sprites",
+      "--no-hooh",
+      "--no-floors",
+      "--no-eggs"
+    ],
+    "as_java_agent": "java -javaagent:bugfix.jar -jar pokewilds.jar"
+  },
+  "exit_codes": {
+    "0": "patched",
+    "1": "wrong arguments",
+    "2": "refused or failed; nothing was written (not the official 0.8.11 jar, already patched, cannot write, ...)"
+  },
+  "expected_result": {
+    "patched_game_classes": 22,
+    "total_game_classes": 405,
+    "patch_fingerprint": "c941c4a955ce9edc550af0bad9008ba1f33107f7ba5560bbd51da5e475112285",
+    "success_line": "Patch fingerprint: <fingerprint>  (identical to the reference build)",
+    "marker_entry_in_output_jar": "META-INF/BUGFIX.txt",
+    "note": "The fingerprint hashes only the patched classes, so it is the same on every machine. The SHA-256 of the whole output jar can differ between Java versions."
+  },
+  "patches": [
+    "floors",
+    "eggs",
+    "sprites",
+    "hooh"
+  ]
+}
