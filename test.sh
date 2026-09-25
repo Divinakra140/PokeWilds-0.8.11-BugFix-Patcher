@@ -14,7 +14,7 @@ javac -d build/test -cp "dist/bugfix.jar:$GAME" tests/*.java 2>&1 | grep -v '^No
 
 echo; echo "== 1. bytecode patches: every patched site accounted for, every class passes the verifier"
 java -Xverify:all -cp "build/test:dist/bugfix.jar:$GAME" local.pokewilds.bugfix.TestFloors "$GAME" 2>&1 | grep -E "^(PASS|FAIL|reads|ALL OK|FAILURES)" | grep -v "^PASS untouched" | grep -v "tiles assignments hooked"
-echo; echo "== 2. per-floor Pokemon maps: logic"
+echo; echo "== 2. per-floor monster maps: logic"
 java -cp "build/test:dist/bugfix.jar" local.pokewilds.bugfix.TestFloorMaps 2>&1 | grep -E "^(FAIL|ALL OK|FAILURES)|randomized"
 echo; echo "== 3. as a -javaagent: all game classes load with the strict verifier"
 java -Xverify:all -javaagent:dist/bugfix.jar -cp "$GAME:build/test" local.pokewilds.bugfix.LoadAll "$GAME" 2>&1 | grep -E "^\[bugfix\] (floors: game jar|agent)|loaded|VERIFY|reflection"

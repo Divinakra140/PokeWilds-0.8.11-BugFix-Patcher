@@ -16,11 +16,11 @@ import local.pokewilds.bugfix.asm.Opcodes;
 /**
  * Fixes for PokeWilds 0.8.11, applied as bytecode patches when the classes load. Four patches:
  * <ol>
- * <li>sprites: Ride/Cut/Build Pokemon face the wrong way with per-species mod sprites;</li>
- * <li>ho_oh: missing base-species entry makes Pokemon near Ho-Oh throw every frame;</li>
- * <li>floors: every floor gets its own Pokemon map instead of one map shared by all floors (see {@link Hooks});</li>
+ * <li>sprites: Ride/Cut/Build monsters face the wrong way with per-species mod sprites;</li>
+ * <li>ho_oh: missing base-species entry makes monsters near Ho-Oh throw every frame;</li>
+ * <li>floors: every floor gets its own monster map instead of one map shared by all floors (see {@link Hooks});</li>
  * <li>eggs: an egg laid on an upper floor is saved as belonging to the first floor;</li>
- * <li>(part of floors) saving writes Pokemon that share a tile with one on another floor to a nearby free tile.</li>
+ * <li>(part of floors) saving writes monsters that share a tile with one on another floor to a nearby free tile.</li>
  * </ol>
  * Each patch can be switched off with -Dbugfix.NAME=false (sprites, hooh, floors, eggs).
  * The floors patch also needs the exact PokeWilds 0.8.11 jar (checked by hash) so that it is applied completely or not at all.
@@ -194,8 +194,8 @@ public final class BugFixAgent {
     /**
      * PokeWilds 0.8.11: Pokemon.baseSpecies is built from "HoOhEvosAttacks:" so it holds the key
      * "hooh", but the species is named "ho_oh" everywhere else. baseSpecie() then returns null for
-     * Ho-Oh and every Pokemon that scans a nearby Ho-Oh throws a NullPointerException each frame.
-     * This registers ho_oh -> ho_oh at the end of Pokemon's static initializer.
+     * Ho-Oh and every monster that scans a nearby Ho-Oh throws a NullPointerException each frame.
+     * This registers ho_oh -> ho_oh at the end of monster's static initializer.
      */
     public static byte[] patchPokemon(byte[] original) {
         final int[] count = {0};
@@ -277,10 +277,10 @@ public final class BugFixAgent {
     }
 
     /**
-     * Floors: reads of PkmnMap.pokemon by code that belongs to a Pokemon go to that Pokemon's own floor
+     * Floors: reads of PkmnMap.pokemon by code that belongs to a monster go to that monster's own floor
      * (Hooks.viewOwner); world-level code (day/night spawning, world generation) goes to the overworld or, for
      * regeneration, all floors. Player, drawing and UI code is left alone: the game's field already points at the
-     * map of the floor the player is on. {@code owner} is the enclosing Pokemon (Pokemon itself, or an inner class
+     * map of the floor the player is on. {@code owner} is the enclosing monster (Pokemon itself, or an inner class
      * with a this$N field of type Pokemon, or an inner class constructor's first argument).
      * Returns null if the class has no reads to route.
      */
@@ -305,7 +305,7 @@ public final class BugFixAgent {
                 MethodVisitor mv = super.visitMethod(access, n, d, sig, ex);
                 methodName[0] = n;
                 final boolean instance = (access & Opcodes.ACC_STATIC) == 0 && !n.equals("<init>") && !n.equals("<clinit>");
-                // An inner class constructor receives the enclosing Pokemon as its first argument.
+                // An inner class constructor receives the enclosing monster as its first argument.
                 final boolean ctorOuter = !isPokemon && outerField[0] != null && n.equals("<init>") && d.startsWith("(L" + POKEMON + ";");
                 return new MethodVisitor(Opcodes.ASM9, mv) {
                     @Override
@@ -344,9 +344,9 @@ public final class BugFixAgent {
     }
 
     /**
-     * Floors, saving: the save file stores Pokemon by position only. Pokemon that are "parked" behind one from
+     * Floors, saving: the save file stores monsters by position only. Monsters that are "parked" behind one from
      * another floor (see Hooks) are not in the game's own position map, so Network.SaveData / MapSaveData would skip
-     * them. Their reads of PkmnMap.pokemon go through Hooks.viewSave, which includes every Pokemon and moves a
+     * them. Their reads of PkmnMap.pokemon go through Hooks.viewSave, which includes every monster and moves a
      * parked one to the nearest free walkable tile of its own floor. Returns null if there are no such reads.
      */
     public static byte[] patchSave(final String className, byte[] original) {
@@ -376,7 +376,7 @@ public final class BugFixAgent {
 
     /**
      * Eggs: Network.PokemonDataV07(Pokemon) saves pokemon.interiorIndex, which is only maintained for
-     * Pokemon the player dropped. Read the floor from the Pokemon's real tile map instead.
+     * monsters the player dropped. Read the floor from the monster's real tile map instead.
      */
     public static byte[] patchEggFloor(byte[] original) {
         final int[] count = {0};

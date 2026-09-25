@@ -7,14 +7,14 @@ game, and the game plays the same afterwards, minus the bugs. It does not includ
 
 ## What it fixes
 
-- **Pokémon on different floors of a building no longer interfere with each other.**
-  Before, a Pokémon on the 10th floor could block, freeze or hide a Pokémon standing at the same spot on the 2nd
+- **Monsters on different floors of a building no longer interfere with each other.**
+  Before, a monster on the 10th floor could block, freeze or hide a monster standing at the same spot on the 2nd
   floor, and the player could get stuck on things that were really on another floor. Now every floor is separate.
 - **Eggs stay on the floor where they were laid.** Before, an egg laid on an upper floor showed up on the first floor
   after you saved and reloaded.
-- **Ride, Cut and Build Pokémon face the right way** when you move up or down. Before, with a modded Pokémon sprite,
+- **Ride, Cut and Build monsters face the right way** when you move up or down. Before, with a modded monster sprite,
   they turned sideways and flipped left and right. Popular sprite mods (such as the 3rd Gen Overhaul) were affected.
-- **Ho-Oh no longer freezes the Pokémon around it.** Before, every Pokémon near Ho-Oh threw an error each frame and
+- **Ho-Oh no longer freezes the monsters around it.** Before, every monster near Ho-Oh threw an error each frame and
   stopped moving.
 
 ## How to use it (Windows)
@@ -43,7 +43,7 @@ java -jar bugfix.jar in.jar out.jar              # write a patched copy and leav
 ## Questions
 
 **Will it break my saves?** No. The save format is unchanged, and your saves and mods are not touched. You can also
-go back to the original game at any time. One difference: if two Pokémon on different floors were standing on exactly
+go back to the original game at any time. One difference: if two monsters on different floors were standing on exactly
 the same spot when you saved, one is saved a tile or two away on its own floor, so nothing is lost.
 
 **Do mods still work?** Yes. Sprite, music and other mods load as before. The fixes only change the game's own code.
@@ -51,7 +51,7 @@ the same spot when you saved, one is saved a tile or two away on its own floor, 
 **What if it says "already patched" or "does not match PokeWilds 0.8.11"?** It only accepts the original 0.8.11 jar.
 "Already patched" means it has been done. Use the restore step first if you want to start again.
 
-**Does it work on Android or ROCKNIX?** It patches the same `pokewilds.jar` those ports use, but the author has only
+**Does it work on Android or ROCKNIX?** It patches the same `pokewilds.jar` those ports use, but I have only
 tested it on desktop.
 
 **Can I use other add-ons with it?** Yes. A patched jar behaves like a normal jar, so add-ons that attach with
@@ -66,30 +66,30 @@ applied exactly as expected. Your original is always kept.
 
 ## The four fixes in detail
 
-1. **Pokémon on different floors of a building affect each other.**
-   Every floor of an interior is its own tile map, but all Pokémon (overworld and every floor) live in one map,
-   `PkmnMap.pokemon`, keyed only by position. Pokémon on different floors that share coordinates therefore block
+1. **Monsters on different floors of a building affect each other.**
+   Every floor of an interior is its own tile map, but all monsters (overworld and every floor) live in one map,
+   `PkmnMap.pokemon`, keyed only by position. Monsters on different floors that share coordinates therefore block
    each other, scan each other, overwrite each other's slot, and hide or freeze each other (a Ho-Oh on floor 10
-   froze Pokémon on floor 2). The patch gives every tile map its own Pokémon map:
+   froze monsters on floor 2). The patch gives every tile map its own monster map:
    - the game's own `pokemon` field is switched to the current floor's map whenever the player changes floor (all 11
      places that assign `PkmnMap.tiles` are hooked), so player, drawing and UI code run unchanged on a normal
-     one-floor map; the drawn-Pokémon list and tile cache are rebuilt on a change;
-   - code that belongs to a Pokémon uses that Pokémon's own floor; world-level code (day/night spawning, world
+     one-floor map; the drawn-monster list and tile cache are rebuilt on a change;
+   - code that belongs to a monster uses that monster's own floor; world-level code (day/night spawning, world
      generation) uses the overworld or all floors;
-   - a Pokémon is registered in exactly one place, so leftover registrations ("trails") cannot pile up;
-   - saving: the save file is keyed by position only, so a Pokémon whose position is already taken by one from
+   - a monster is registered in exactly one place, so leftover registrations ("trails") cannot pile up;
+   - saving: the save file is keyed by position only, so a monster whose position is already taken by one from
      another floor is written to the nearest free tile of its own floor. Nothing is dropped. The save format is
      unchanged.
 2. **Eggs laid on upper floors reload on the first floor.** `Network.PokemonDataV07(Pokemon)` saves
-   `pokemon.interiorIndex`, which is only kept up to date for Pokémon the player dropped; a new egg keeps the
-   default 100 (the first floor). The patch saves the index of the tile map the Pokémon is really on. Eggs that are
+   `pokemon.interiorIndex`, which is only kept up to date for monsters the player dropped; a new egg keeps the
+   default 100 (the first floor). The patch saves the index of the tile map the monster is really on. Eggs that are
    already in a save on the wrong floor stay there.
-3. **Cut / Ride / Build Pokémon face sideways when moving up or down** with per-species mod sprites
+3. **Cut / Ride / Build monsters face sideways when moving up or down** with per-species mod sprites
    (`mods/pokemon/<name>/overworld.png`, a vertical 16x96 strip). `DrawPlayerUpper/Lower` force the drawn region's Y
    from `player.spriteOffsetY`, which vertical mod sheets never set. The patch uses the sprite's own region Y, which
    is identical for the built-in sheet. Popular mods such as the 3rd Gen Overhaul are affected by the bug.
 4. **`ho_oh` missing from `Pokemon.baseSpecies`.** The table is keyed from `evos_attacks.asm` headers
-   (`HoOhEvosAttacks:` becomes `hooh`) but the species is `ho_oh`, so every Pokémon near Ho-Oh threw a
+   (`HoOhEvosAttacks:` becomes `hooh`) but the species is `ho_oh`, so every monster near Ho-Oh threw a
    `NullPointerException` each frame and stopped updating. The patch adds the missing entry.
 
 ## Patcher options
@@ -120,8 +120,8 @@ bundled under a relocated package so it cannot clash with the older ASM inside `
 ./test.sh /path/to/pokewilds.jar    # builds, then runs all checks against the official jar
 ```
 
-The checks cover: every patched site accounted for against an independent scan of the jar (95 reads of the Pokémon
-map: 40 routed to the Pokémon's floor, 7 to the overworld, 3 to all floors, 4 to the save; 11 floor assignments; 1
+The checks cover: every patched site accounted for against an independent scan of the jar (95 reads of the monster
+map: 40 routed to the monster's floor, 7 to the overworld, 3 to all floors, 4 to the save; 11 floor assignments; 1
 constructor init); every patched class passing `-Xverify:all`; all 405 game classes loading both through the agent
 and from a patched jar with no agent; the per-floor maps' logic, including a randomized run of the game's
 register/unregister protocol with leftover registrations injected; and the patcher refusing anything but the
@@ -129,10 +129,10 @@ official jar.
 
 ## Status
 
-The fixes were played through on desktop (Windows, stock 0.8.11 jar) on a save with a 20+ floor tower full of
-roaming Pokémon: collisions on every floor behave like a one-floor game, saving and reloading keeps each floor's
-Pokémon, Ride/Cut/Build face the right way, and the Ho-Oh error is gone. Overhead is small: about 0.2 ms extra per
-frame for a frame's worth of Pokémon scans (300 Pokémon), measured in isolation. Not tested by the author: other
+I played through the fixes on desktop (Windows, stock 0.8.11 jar) on a save with a 20+ floor tower full of
+roaming monsters: collisions on every floor behave like a one-floor game, saving and reloading keeps each floor's
+monsters, Ride/Cut/Build face the right way, and the Ho-Oh error is gone. Overhead is small: about 0.2 ms extra per
+frame for a frame's worth of monster scans (300 monsters), measured in isolation. I have not tested other
 platforms (Android, ROCKNIX).
 
 ## Layout

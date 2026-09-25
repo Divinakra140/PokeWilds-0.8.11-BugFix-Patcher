@@ -18,14 +18,14 @@ import java.util.Set;
 /**
  * Runtime support for the "floors" fix. Public because patched game classes call it.
  *
- * PokeWilds keeps every Pokemon (overworld and every floor of every interior) in ONE map, PkmnMap.pokemon,
- * keyed only by position, although each floor has its own tile map. Pokemon on different floors that share
+ * PokeWilds keeps every monster (overworld and every floor of every interior) in ONE map, PkmnMap.pokemon,
+ * keyed only by position, although each floor has its own tile map. Monsters on different floors that share
  * coordinates therefore block, scan, overwrite and hide each other.
  *
  * This replaces that map with one real map per floor (a {@link FloorMap} for each tile map, all owned by one
  * {@link Registry}). The game's own field PkmnMap.pokemon is always switched to the map of the floor the player
  * is on, so all player, drawing and UI code runs unchanged on a normal single-floor map. Code that belongs to a
- * Pokemon is routed to that Pokemon's own floor ({@link #viewOwner}). A Pokemon is registered in exactly one
+ * monster is routed to that monster's own floor ({@link #viewOwner}). A monster is registered in exactly one
  * place; putting it somewhere new removes its previous registration.
  *
  * Everything fails safe: if the game does not look as expected, the original map is used.
@@ -67,7 +67,7 @@ public final class Hooks {
         return mapTilesField != null;
     }
 
-    /** The floor (tile map) a Pokemon lives on, or null if unknown. */
+    /** The floor (tile map) a monster lives on, or null if unknown. */
     static Object floorOf(Object pokemon) {
         if (pokemon == null) return null;
         if (pokemonClass != pokemon.getClass() && !bindPokemon(pokemon.getClass())) return null;
@@ -80,7 +80,7 @@ public final class Hooks {
     static final class Registry {
         final Object pkmnMap;
         final IdentityHashMap<Object, FloorMap> byFloor = new IdentityHashMap<Object, FloorMap>();
-        /** Pokemon -> {FloorMap, key}: where each Pokemon is registered (at most one place). */
+        /** monsters -> {FloorMap, key}: where each monster is registered (at most one place). */
         final IdentityHashMap<Object, Object[]> where = new IdentityHashMap<Object, Object[]>();
         final Field fPokemon, fTiles, fOverworld, fRefreshDrawn, fRefreshTiles;
         int nextSeq;
@@ -150,7 +150,7 @@ public final class Hooks {
         @Override public Object put(Object k, Object v) {
             if (v == null) return super.put(k, v);
             Object vf = floorOf(v);
-            if (vf != null && vf != floor) return reg.floorMap(vf).put(k, v);        // a Pokemon belongs on its own floor
+            if (vf != null && vf != floor) return reg.floorMap(vf).put(k, v);        // a monster belongs on its own floor
             Object[] w = reg.where.get(v);
             if (w != null && (w[0] != this || !w[1].equals(k))) {                    // it was registered somewhere else: drop that
                 FloorMap wm = (FloorMap) w[0];
@@ -215,7 +215,7 @@ public final class Hooks {
         }
     }
 
-    /** For code that belongs to a Pokemon: the map of that Pokemon's own floor. {@code m} is what the code read from the field. */
+    /** For code that belongs to a monster: the map of that monster's own floor. {@code m} is what the code read from the field. */
     public static Map viewOwner(Map m, Object owner) {
         if (!(m instanceof FloorMap) || owner == null) return m;
         Object f = floorOf(owner);
@@ -257,8 +257,8 @@ public final class Hooks {
 
     /**
      * Replaces the read of Pokemon.interiorIndex when saving a Pokemon. The field is only kept up to date for
-     * Pokemon the player dropped, so e.g. an egg laid on floor 5 was saved as floor 100 (the first floor).
-     * The floor is derived from the tile map the Pokemon is really on.
+     * monsters the player dropped, so e.g. an egg laid on floor 5 was saved as floor 100 (the first floor).
+     * The floor is derived from the tile map the monster is really on.
      */
     public static int floorIndex(Object pokemon) {
         int stored = 0;
@@ -277,8 +277,8 @@ public final class Hooks {
     // ------------------------------------------------------------------ saving
 
     /**
-     * For the save code: every Pokemon exactly once, under a unique position. The save file is keyed by position
-     * only, but Pokemon on different floors share coordinates, so a Pokemon whose position is already taken is
+     * For the save code: every monster exactly once, under a unique position. The save file is keyed by position
+     * only, but monsters on different floors share coordinates, so a monster whose position is already taken is
      * written to the nearest free tile of its own floor instead (walkable if possible). Never drops a Pokemon.
      */
     public static Map viewSave(Map m) {
@@ -409,7 +409,7 @@ public final class Hooks {
         } catch (Throwable t) { return p.getClass().getSimpleName(); }
     }
 
-    /** Lists registrations of the current floor whose Pokemon is not near its registered tile (possible phantoms). */
+    /** Lists registrations of the current floor whose monster is not near its registered tile (possible phantoms). */
     static void audit(Registry r) {
         try {
             FloorMap cur = r.floorMap(r.currentTiles());

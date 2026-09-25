@@ -27,7 +27,7 @@ public class TestFloorMaps {
         check(gm.pokemon instanceof Hooks.FloorMap, "constructor hook installs a per-floor map for the overworld");
 
         Mon g2 = new Mon("ghastly", F2), h10 = new Mon("hooh", F10), ow = new Mon("wild", OW);
-        // 1. registration goes to the Pokemon's own floor, whichever map the caller holds
+        // 1. registration goes to the monster's own floor, whichever map the caller holds
         field(gm).put(p(1, 1), g2);
         field(gm).put(p(1, 1), h10);          // same coordinates, another floor: no collision
         field(gm).put(p(1, 1), ow);
@@ -35,7 +35,7 @@ public class TestFloorMaps {
         check(Hooks.viewOwner(field(gm), g2).get(p(1, 1)) == g2 && Hooks.viewOwner(field(gm), h10).get(p(1, 1)) == h10, "each floor keeps its own Pokemon at the shared coordinates");
         check(Hooks.viewOwner(field(gm), g2).get(p(2, 2)) == null, "an empty tile is empty");
 
-        // 2. the Ho-Oh case: floor 2's ghastly must not see floor 10's Pokemon
+        // 2. the Ho-Oh case: floor 2's ghastly must not see floor 10's monsters
         Mon far10 = new Mon("far", F10); Hooks.viewOwner(field(gm), far10).put(p(3, 3), far10);
         check(!Hooks.viewOwner(field(gm), g2).containsKey(p(3, 3)), "floor 2 does not see floor 10's Pokemon");
         check(Hooks.viewOwner(field(gm), far10).containsKey(p(3, 3)), "floor 10 sees it");
@@ -50,7 +50,7 @@ public class TestFloorMaps {
         gm.tiles = OW; Hooks.tilesChanged(gm);
         check(field(gm).get(p(1, 1)) == ow, "back outside: the overworld map again");
 
-        // 4. at most one registration per Pokemon: a leftover trail is removed
+        // 4. at most one registration per monster: a leftover trail is removed
         Mon t = new Mon("trail", F2); gm.tiles = F2; Hooks.tilesChanged(gm);
         field(gm).put(p(4, 4), t); field(gm).put(p(5, 4), t);                 // registered twice in the original game (no remove in between)
         check(!field(gm).containsKey(p(4, 4)) && field(gm).get(p(5, 4)) == t, "registering a Pokemon again removes its old registration (no trail)");
@@ -67,7 +67,7 @@ public class TestFloorMaps {
         check(Hooks.viewOwner(field(gm), r1).remove(p(0, 0)) == r2 && !Hooks.viewOwner(field(gm), r1).containsKey(p(0, 0)), "remove works per floor");
         check(Hooks.viewOwner(field(gm), r1).remove(p(0, 0)) == null, "removing twice is harmless");
 
-        // 6. unknown-floor Pokemon land in the map that was asked
+        // 6. unknown-floor monsters land in the map that was asked
         Mon u = new Mon("unknown", null); Hooks.viewOwner(field(gm), u).put(p(7, 7), u);
         check(field(gm).get(p(7, 7)) == u, "a Pokemon with no floor is registered where the caller is");
 
