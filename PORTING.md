@@ -5,7 +5,7 @@ handhelds and so on. Windows players don't need this page. They use `PokeWilds-B
 
 ## What you get
 
-The download for you is `PokeWilds-BugFix-v1.0-for-ports.zip`. Everything is loose in the zip (no folder):
+The download for you is `v1.0-for-port-devs.zip`. Everything is loose in the zip (no folder):
 
 | File | What it is |
 | --- | --- |

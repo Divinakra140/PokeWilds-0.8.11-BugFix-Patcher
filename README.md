@@ -69,7 +69,7 @@ applied exactly as expected. Your original is always kept.
 # For developers
 
 Building this into a port (Android, PortMaster, ROCKNIX and so on)? See [PORTING.md](PORTING.md) and the
-`PokeWilds-BugFix-v1.0-for-ports.zip` download.
+`v1.0-for-port-devs.zip` download.
 
 ## The four fixes in detail
 
