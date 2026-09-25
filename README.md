@@ -1,10 +1,68 @@
 # PokeWilds 0.8.11 BugFix
 
-Fixes four bugs in [PokeWilds](https://github.com/SheerSt/pokewilds) 0.8.11 by patching the compiled game.
-It ships **no game files**: it is a patcher (and an equivalent `-javaagent`) that you run on your own copy of the
-official 0.8.11 release. Everything here is MIT-licensed.
+Fixes four bugs in [PokeWilds](https://github.com/SheerSt/pokewilds) 0.8.11. You run it once on your own copy of the
+game, and the game plays the same afterwards, minus the bugs. It does not include any game files.
 
 ## What it fixes
+
+- **Pokémon on different floors of a building no longer interfere with each other.**
+  Before, a Pokémon on the 10th floor could block, freeze or hide a Pokémon standing at the same spot on the 2nd
+  floor, and the player could get stuck on things that were really on another floor. Now every floor is separate.
+- **Eggs stay on the floor where they were laid.** Before, an egg laid on an upper floor showed up on the first floor
+  after you saved and reloaded.
+- **Ride, Cut and Build Pokémon face the right way** when you move up or down. Before, with a modded Pokémon sprite,
+  they turned sideways and flipped left and right. Popular sprite mods (such as the 3rd Gen Overhaul) were affected.
+- **Ho-Oh no longer freezes the Pokémon around it.** Before, every Pokémon near Ho-Oh threw an error each frame and
+  stopped moving.
+
+## How to use it (Windows)
+
+You need Java, the same one you use to run the game.
+
+1. **Download** `PokeWilds-BugFix-v1.0.zip` from the [Releases](../../releases) page and unzip it anywhere.
+2. **Get the official game.** Download `pokewilds-otherplatforms.zip` from the
+   [PokeWilds v0.8.11 release](https://github.com/SheerSt/pokewilds/releases/tag/v0.8.11) and unzip it, or use the
+   `app\pokewilds.jar` from a copy of the game you already have. It must be the original, unmodified 0.8.11 jar.
+3. **Drag `pokewilds.jar` onto `Patch PokeWilds (Windows, drag and drop).bat`.** It takes a minute or two.
+   The window ends with `Done. pokewilds.jar is now the patched game.`
+4. **Play as usual.** Your original is kept next to it as `pokewilds-original.jar.bak`.
+
+**To undo:** drag the patched `pokewilds.jar` onto `Restore original PokeWilds (Windows, drag and drop).bat`.
+Your original comes back, and the patched one is kept as `pokewilds-bugfix.jar`.
+
+### macOS and Linux
+
+```sh
+java -jar bugfix.jar pokewilds.jar               # patch in place (keeps pokewilds-original.jar.bak)
+java -jar bugfix.jar --restore pokewilds.jar     # undo
+java -jar bugfix.jar in.jar out.jar              # write a patched copy and leave the input alone
+```
+
+## Questions
+
+**Will it break my saves?** No. The save format is unchanged, and your saves and mods are not touched. You can also
+go back to the original game at any time. One difference: if two Pokémon on different floors were standing on exactly
+the same spot when you saved, one is saved a tile or two away on its own floor, so nothing is lost.
+
+**Do mods still work?** Yes. Sprite, music and other mods load as before. The fixes only change the game's own code.
+
+**What if it says "already patched" or "does not match PokeWilds 0.8.11"?** It only accepts the original 0.8.11 jar.
+"Already patched" means it has been done. Use the restore step first if you want to start again.
+
+**Does it work on Android or ROCKNIX?** It patches the same `pokewilds.jar` those ports use, but the author has only
+tested it on desktop.
+
+**Can I use other add-ons with it?** Yes. A patched jar behaves like a normal jar, so add-ons that attach with
+`-javaagent` still work on top of it.
+
+**Is it safe?** The patcher checks that your jar is exactly the official 0.8.11, and it writes nothing unless every fix
+applied exactly as expected. Your original is always kept.
+
+---
+
+# For developers
+
+## The four fixes in detail
 
 1. **Pokémon on different floors of a building affect each other.**
    Every floor of an interior is its own tile map, but all Pokémon (overworld and every floor) live in one map,
@@ -32,46 +90,14 @@ official 0.8.11 release. Everything here is MIT-licensed.
    (`HoOhEvosAttacks:` becomes `hooh`) but the species is `ho_oh`, so every Pokémon near Ho-Oh threw a
    `NullPointerException` each frame and stopped updating. The patch adds the missing entry.
 
-## Use it
+## Patcher options
 
-You need the official PokeWilds **0.8.11** release: the `pokewilds-otherplatforms.zip` asset on the
-[v0.8.11 release page](https://github.com/SheerSt/pokewilds/releases/tag/v0.8.11) (SHA-256
-`5c0aca7f447ee6b4ed587f3ab2cefaf445219059d790862a7121c56a72fb22ba`), which contains `pokewilds.jar`.
-Download `bugfix.jar` from this repo's releases (or build it, see below).
+`--no-sprites`, `--no-hooh`, `--no-floors`, `--no-eggs` leave individual fixes out. The patcher also prints a **patch
+fingerprint**, a hash of the patched classes that is the same on every machine (the hash of the jar file is not, since
+it depends on how the zip is compressed). It should read `identical to the reference build`. The patched jar reads and
+writes the same save format as the original.
 
-### Option A: patch the jar once (recommended)
-
-It is a Java program, so it runs anywhere Java 8+ does (Windows, macOS, Linux). Patching **in place** replaces the
-jar with the fixed one under the same name, so nothing else has to change, and keeps your original next to it:
-
-```sh
-java -jar bugfix.jar pokewilds.jar
-# -> pokewilds.jar               the patched game
-# -> pokewilds-original.jar.bak  your original, untouched
-```
-
-On Windows, drag `pokewilds.jar` onto `Patch PokeWilds (Windows, drag and drop).bat` (keep it next to `bugfix.jar`).
-Patching rewrites the whole ~150 MB jar and can take a minute or two.
-
-To undo, run `java -jar bugfix.jar --restore pokewilds.jar` (on Windows, drag the patched jar onto
-`Restore original PokeWilds (Windows, drag and drop).bat`). The patched jar is kept as `pokewilds-bugfix.jar`.
-
-To write a patched copy and leave the input alone, give two file names: `java -jar bugfix.jar in.jar out.jar`.
-
-Then run the game exactly like the original: no launcher changes, and other `-javaagent` add-ons still work on top
-of it. The patcher only accepts the official, unmodified 0.8.11 class files, and writes nothing unless every patch
-applied exactly as expected. It never overwrites an existing, different backup. Options `--no-sprites`,
-`--no-hooh`, `--no-floors`, `--no-eggs` leave individual fixes out.
-
-It also prints a **patch fingerprint**, a hash of the patched classes that is the same on every machine (unlike the
-hash of the jar file, which depends on how the zip was compressed). It should read
-`identical to the reference build`.
-
-Your saves and mods are not touched. A patched jar reads and writes the same save format. If you go back to the
-original jar, Pokémon that were written to a different tile because two floors shared one are simply where the save
-put them.
-
-### Option B: use it as a `-javaagent` (nothing on disk changes)
+### Using it as a `-javaagent` instead (nothing on disk changes)
 
 ```sh
 java -javaagent:bugfix.jar -jar pokewilds.jar
