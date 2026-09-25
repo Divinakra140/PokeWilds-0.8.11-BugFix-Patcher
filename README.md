@@ -1,5 +1,7 @@
 # PokeWilds 0.8.11 Bug Fix Patcher
 
+By Divinakra
+
 **Version 1.0**: an unofficial community tool that fixes four bugs in [SheerSt's PokeWilds](https://github.com/SheerSt/pokewilds) 0.8.11. You run it once on your own copy of the official 0.8.11 game, and the game plays the same afterwards, minus the bugs. It does not include any game files, and it is not an official release by SheerSt.
 
 ## What it fixes
