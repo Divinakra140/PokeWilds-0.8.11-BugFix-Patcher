@@ -28,34 +28,108 @@ import local.pokewilds.bugfix.asm.Opcodes;
  * needs no -javaagent. It applies exactly the same patches as the agent (BugFixAgent.transformClass), adds the
  * runtime support classes (Hooks), and refuses to write anything unless every patch applied as expected.
  *
- * Usage: java -jar bugfix.jar [--no-sprites] [--no-hooh] [--no-floors] [--no-eggs] input-pokewilds.jar output-pokewilds.jar
+ * Usage:
+ *   java -jar bugfix.jar pokewilds.jar               patch in place; the original is kept as pokewilds-original.jar.bak
+ *   java -jar bugfix.jar in.jar out.jar              write a patched copy, leave the input alone
+ *   java -jar bugfix.jar --restore pokewilds.jar     put the original back
+ * Options: --no-sprites --no-hooh --no-floors --no-eggs
  */
 public final class PatchJar {
     private PatchJar() {}
 
+    /** Fingerprint of the four patches applied to the official 0.8.11 jar (independent of how the jar is compressed). */
+    static final String REFERENCE_FINGERPRINT = "c941c4a955ce9edc550af0bad9008ba1f33107f7ba5560bbd51da5e475112285";
+
     public static void main(String[] args) throws Exception {
-        boolean sprites = true, hooh = true, floors = true, eggs = true;
+        boolean sprites = true, hooh = true, floors = true, eggs = true, restore = false;
         List<String> files = new ArrayList<String>();
         for (String a : args) {
             if (a.equals("--no-sprites")) sprites = false;
             else if (a.equals("--no-hooh")) hooh = false;
             else if (a.equals("--no-floors")) floors = false;
             else if (a.equals("--no-eggs")) eggs = false;
+            else if (a.equals("--restore")) restore = true;
             else files.add(a);
         }
-        if (files.size() != 2) {
-            System.err.println("Usage: java -jar bugfix.jar [--no-sprites] [--no-hooh] [--no-floors] [--no-eggs] <official pokewilds.jar> <output jar>");
-            System.exit(1);
-        }
-        File in = new File(files.get(0)), out = new File(files.get(1));
-        if (in.getCanonicalFile().equals(out.getCanonicalFile())) fail("input and output must be different files");
+        String usage = "Usage:\n  java -jar bugfix.jar <pokewilds.jar>              patch in place (the original is kept as a backup)\n"
+                + "  java -jar bugfix.jar <in.jar> <out.jar>           write a patched copy, leave the input alone\n"
+                + "  java -jar bugfix.jar --restore <pokewilds.jar>    put the original back\n"
+                + "Options: --no-sprites --no-hooh --no-floors --no-eggs";
         try {
-            patch(in, out, sprites, hooh, floors, eggs);
+            if (restore) {
+                if (files.size() != 1) { System.err.println(usage); System.exit(1); }
+                restore(new File(files.get(0)));
+            } else if (files.size() == 1) {
+                patchInPlace(new File(files.get(0)), sprites, hooh, floors, eggs);
+            } else if (files.size() == 2) {
+                File in = new File(files.get(0)), out = new File(files.get(1));
+                if (in.getCanonicalFile().equals(out.getCanonicalFile())) fail("input and output must be different files (to patch in place, give only one file)");
+                patch(in, out, sprites, hooh, floors, eggs);
+            } else {
+                System.err.println(usage);
+                System.exit(1);
+            }
         } catch (PatchException e) {
-            if (out.exists()) out.delete();
             System.err.println("ERROR: " + e.getMessage());
             System.exit(2);
         }
+    }
+
+    /** pokewilds.jar -> pokewilds-original.jar.bak (the official jar), pokewilds.jar (patched). */
+    static File backupOf(File jar) {
+        String n = jar.getName();
+        if (n.toLowerCase().endsWith(".jar")) n = n.substring(0, n.length() - 4);
+        return new File(jar.getAbsoluteFile().getParentFile(), n + "-original.jar.bak");
+    }
+
+    static boolean isPatched(File jar) throws IOException {
+        try (ZipFile z = new ZipFile(jar)) { return z.getEntry("META-INF/BUGFIX.txt") != null; }
+    }
+
+    static void patchInPlace(File jar, boolean sprites, boolean hooh, boolean floors, boolean eggs) throws Exception {
+        if (!jar.isFile()) throw new PatchException("file not found: " + jar);
+        File backup = backupOf(jar);
+        if (isPatched(jar)) {
+            throw new PatchException(jar.getName() + " is already patched by BugFix." + (backup.exists() ? "\nYour original is saved as " + backup.getName()
+                    + ". To undo, run: java -jar bugfix.jar --restore " + jar.getName() : ""));
+        }
+        File tmp = new File(jar.getAbsolutePath() + ".bugfix-tmp");
+        try {
+            patch(jar, tmp, sprites, hooh, floors, eggs);
+            if (backup.exists()) {
+                // An earlier backup is only reused if it is the very same jar, so nothing is ever overwritten.
+                if (!sha256(java.nio.file.Files.readAllBytes(backup.toPath())).equals(sha256(java.nio.file.Files.readAllBytes(jar.toPath()))))
+                    throw new PatchException("the backup file " + backup.getName() + " already exists and is a different jar. Move it away first, so it is not overwritten.");
+            } else {
+                java.nio.file.Files.move(jar.toPath(), backup.toPath());
+            }
+            try {
+                java.nio.file.Files.move(tmp.toPath(), jar.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                if (!jar.exists() && backup.exists()) java.nio.file.Files.move(backup.toPath(), jar.toPath());   // roll back
+                throw new PatchException("could not replace " + jar.getName() + " (" + e.getMessage() + "). Is the game still running? Close it and try again.");
+            }
+        } catch (IOException e) {
+            throw new PatchException("could not write next to " + jar.getName() + " (" + e.getMessage() + "). Is the game running, or is the folder protected? Close the game, or use: java -jar bugfix.jar <in.jar> <out.jar>");
+        } finally {
+            if (tmp.exists()) tmp.delete();
+        }
+        System.out.println();
+        System.out.println("Done. " + jar.getName() + " is now the patched game.");
+        System.out.println("Your original is saved as " + backup.getName() + ". To go back:  java -jar bugfix.jar --restore " + jar.getName());
+    }
+
+    static void restore(File jar) throws Exception {
+        File backup = backupOf(jar);
+        if (!backup.isFile()) throw new PatchException("no backup found (" + backup.getName() + " next to " + jar.getName() + ")");
+        if (jar.exists()) {
+            File keep = new File(jar.getAbsoluteFile().getParentFile(), jar.getName().replaceAll("(?i)\\.jar$", "") + "-bugfix.jar");
+            if (keep.exists() && !keep.delete()) throw new PatchException("cannot replace " + keep.getName());
+            java.nio.file.Files.move(jar.toPath(), keep.toPath());
+            System.out.println("The patched jar was kept as " + keep.getName() + ".");
+        }
+        java.nio.file.Files.move(backup.toPath(), jar.toPath());
+        System.out.println("Restored the original " + jar.getName() + ".");
     }
 
     static final class PatchException extends Exception { PatchException(String m) { super(m); } }
@@ -63,6 +137,7 @@ public final class PatchJar {
 
     static void patch(File inFile, File outFile, boolean sprites, boolean hooh, boolean floors, boolean eggs) throws Exception {
         List<String> applied = new ArrayList<String>();
+        Map<String, byte[]> patchedBytes = new TreeMap<String, byte[]>();
         Map<String, Integer> hookCalls = new TreeMap<String, Integer>();
         int classes = 0, patchedClasses = 0;
         try (ZipFile zin = new ZipFile(inFile)) {
@@ -100,6 +175,7 @@ public final class PatchJar {
                         if (r != null) {
                             data = r;
                             patchedClasses++;
+                            patchedBytes.put(cn, r);
                             for (Map.Entry<String, Integer> h : countHooks(r).entrySet()) {
                                 Integer old = hookCalls.get(h.getKey());
                                 hookCalls.put(h.getKey(), (old == null ? 0 : old) + h.getValue());
@@ -140,7 +216,12 @@ public final class PatchJar {
             if (!tmp.renameTo(outFile)) throw new PatchException("cannot write " + outFile);
         }
         System.out.println("Patched " + patchedClasses + " of " + classes + " game classes.");
-        System.out.println("Wrote " + outFile + "  (sha256 " + sha256(java.nio.file.Files.readAllBytes(outFile.toPath())) + ")");
+        String fp = fingerprint(patchedBytes);
+        boolean all = sprites && hooh && floors && eggs;
+        System.out.println("Patch fingerprint: " + fp + (all && !REFERENCE_FINGERPRINT.equals("TBD")
+                ? (fp.equals(REFERENCE_FINGERPRINT) ? "  (identical to the reference build)" : "  (DIFFERS from the reference build)") : ""));
+        if (!outFile.getName().endsWith(".bugfix-tmp"))
+            System.out.println("Wrote " + outFile + "  (file sha256 " + sha256(java.nio.file.Files.readAllBytes(outFile.toPath())) + ")");
     }
 
     /** What a complete patch of PokeWilds 0.8.11 looks like. */
@@ -207,6 +288,21 @@ public final class PatchJar {
             for (int r; (r = in.read(buf)) > 0; ) bo.write(buf, 0, r);
             return bo.toByteArray();
         }
+    }
+
+    /** Hash of the patched classes' names and bytes: the same on every machine, whatever compresses the jar. */
+    static String fingerprint(Map<String, byte[]> patched) throws Exception {
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        for (Map.Entry<String, byte[]> e : patched.entrySet()) {
+            md.update(e.getKey().getBytes(StandardCharsets.UTF_8));
+            md.update((byte) 0);
+            int n = e.getValue().length;
+            md.update(new byte[] {(byte) (n >>> 24), (byte) (n >>> 16), (byte) (n >>> 8), (byte) n});
+            md.update(e.getValue());
+        }
+        StringBuilder sb = new StringBuilder();
+        for (byte b : md.digest()) sb.append(String.format("%02x", b));
+        return sb.toString();
     }
 
     static String sha256(byte[] data) throws Exception {

@@ -41,19 +41,31 @@ Download `bugfix.jar` from this repo's releases (or build it, see below).
 
 ### Option A: patch the jar once (recommended)
 
-It is a Java program, so it runs anywhere Java 8+ does (Windows, macOS, Linux):
+It is a Java program, so it runs anywhere Java 8+ does (Windows, macOS, Linux). Patching **in place** replaces the
+jar with the fixed one under the same name, so nothing else has to change, and keeps your original next to it:
 
 ```sh
-java -jar bugfix.jar pokewilds.jar pokewilds-bugfix.jar
+java -jar bugfix.jar pokewilds.jar
+# -> pokewilds.jar               the patched game
+# -> pokewilds-original.jar.bak  your original, untouched
 ```
 
-On Windows you can instead drag `pokewilds.jar` onto `Patch PokeWilds (Windows, drag and drop).bat` (keep it next to
-`bugfix.jar`); it writes `pokewilds-bugfix.jar` beside the jar you dropped.
+On Windows, drag `pokewilds.jar` onto `Patch PokeWilds (Windows, drag and drop).bat` (keep it next to `bugfix.jar`).
+Patching rewrites the whole ~150 MB jar and can take a minute or two.
 
-Then run `pokewilds-bugfix.jar` exactly like the original: no launcher changes, and other `-javaagent` add-ons
-still work on top of it. The patcher only accepts the official, unmodified 0.8.11 class files, and writes nothing
-unless every patch applied exactly as expected. The output is identical from run to run. Options
-`--no-sprites`, `--no-hooh`, `--no-floors`, `--no-eggs` leave individual fixes out.
+To undo, run `java -jar bugfix.jar --restore pokewilds.jar` (on Windows, drag the patched jar onto
+`Restore original PokeWilds (Windows, drag and drop).bat`). The patched jar is kept as `pokewilds-bugfix.jar`.
+
+To write a patched copy and leave the input alone, give two file names: `java -jar bugfix.jar in.jar out.jar`.
+
+Then run the game exactly like the original: no launcher changes, and other `-javaagent` add-ons still work on top
+of it. The patcher only accepts the official, unmodified 0.8.11 class files, and writes nothing unless every patch
+applied exactly as expected. It never overwrites an existing, different backup. Options `--no-sprites`,
+`--no-hooh`, `--no-floors`, `--no-eggs` leave individual fixes out.
+
+It also prints a **patch fingerprint**, a hash of the patched classes that is the same on every machine (unlike the
+hash of the jar file, which depends on how the zip was compressed). It should read
+`identical to the reference build`.
 
 Your saves and mods are not touched. A patched jar reads and writes the same save format. If you go back to the
 original jar, Pokémon that were written to a different tile because two floors shared one are simply where the save
@@ -102,7 +114,8 @@ platforms (Android, ROCKNIX).
 | `src/local/pokewilds/bugfix/BugFixAgent.java` | the bytecode patches and the `-javaagent` entry point |
 | `src/local/pokewilds/bugfix/PatchJar.java` | the offline patcher (`java -jar bugfix.jar in out`) |
 | `src/local/pokewilds/bugfix/Hooks.java` | runtime support the patched classes call (per-floor maps, saving, egg floor) |
-| `Patch PokeWilds (Windows, drag and drop).bat` | drag-and-drop launcher for the patcher on Windows |
+| `Patch PokeWilds (Windows, drag and drop).bat` | drag-and-drop patcher on Windows (in place, keeps a backup) |
+| `Restore original PokeWilds (Windows, drag and drop).bat` | puts the original jar back |
 | `tools/RelocateAsm.java` | copies ASM into the bugfix package at build time |
 | `tests/` | the checks run by `test.sh` |
 

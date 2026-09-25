@@ -24,5 +24,17 @@ java -jar dist/bugfix.jar "$GAME" build/patched.jar 2>&1 | grep -E "^(Patched|Wr
 java -Xverify:all -cp "build/patched.jar:build/test" local.pokewilds.bugfix.LoadAll build/patched.jar 2>&1 | grep -E "loaded|VERIFY|reflection"
 java -Xverify:all -cp "build/patched.jar:build/test" HoOhCheck 2>&1 | tail -1
 echo; echo "== 5. the patcher refuses anything but the official jar"
-! java -jar dist/bugfix.jar build/patched.jar build/again.jar 2>&1 | grep -E "^ERROR"
-echo; echo "Done."
+AGAIN=$(java -jar dist/bugfix.jar build/patched.jar build/again.jar 2>&1 || true)
+echo "$AGAIN" | grep -q "^ERROR" && echo "PASS an already patched jar is refused" || { echo "FAIL an already patched jar was accepted"; exit 1; }
+[ ! -e build/again.jar ] && echo "PASS nothing was written" || { echo "FAIL a file was written"; exit 1; }
+echo; echo "== 6. patch in place, keep a backup, restore"
+rm -rf build/inplace && mkdir -p build/inplace && cp "$GAME" build/inplace/pokewilds.jar
+ORIG_SUM=$(shasum -a 256 build/inplace/pokewilds.jar | cut -d' ' -f1)
+java -jar dist/bugfix.jar build/inplace/pokewilds.jar 2>&1 | grep -E "^(Patched|Patch fingerprint|Done|Your original|ERROR)"
+[ -f build/inplace/pokewilds-original.jar.bak ] && [ "$(shasum -a 256 build/inplace/pokewilds-original.jar.bak | cut -d' ' -f1)" = "$ORIG_SUM" ] && echo "PASS the backup is byte-identical to the original"
+TWICE=$(java -jar dist/bugfix.jar build/inplace/pokewilds.jar 2>&1 || true)
+echo "$TWICE" | grep -q "already patched" && echo "PASS patching twice is refused, the patched jar is left alone" || { echo "FAIL patching twice was not refused"; exit 1; }
+java -Xverify:all -cp "build/inplace/pokewilds.jar:build/test" HoOhCheck 2>&1 | tail -1
+java -jar dist/bugfix.jar --restore build/inplace/pokewilds.jar 2>&1
+[ "$(shasum -a 256 build/inplace/pokewilds.jar | cut -d' ' -f1)" = "$ORIG_SUM" ] && [ -f build/inplace/pokewilds-bugfix.jar ] && echo "PASS restore puts the byte-identical original back and keeps the patched jar"
+echo; echo "All checks passed."
