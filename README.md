@@ -41,9 +41,14 @@ Download `bugfix.jar` from this repo's releases (or build it, see below).
 
 ### Option A: patch the jar once (recommended)
 
+It is a Java program, so it runs anywhere Java 8+ does (Windows, macOS, Linux):
+
 ```sh
 java -jar bugfix.jar pokewilds.jar pokewilds-bugfix.jar
 ```
+
+On Windows you can instead drag `pokewilds.jar` onto `Patch PokeWilds (Windows, drag and drop).bat` (keep it next to
+`bugfix.jar`); it writes `pokewilds-bugfix.jar` beside the jar you dropped.
 
 Then run `pokewilds-bugfix.jar` exactly like the original: no launcher changes, and other `-javaagent` add-ons
 still work on top of it. The patcher only accepts the official, unmodified 0.8.11 class files, and writes nothing
@@ -97,6 +102,7 @@ platforms (Android, ROCKNIX).
 | `src/local/pokewilds/bugfix/BugFixAgent.java` | the bytecode patches and the `-javaagent` entry point |
 | `src/local/pokewilds/bugfix/PatchJar.java` | the offline patcher (`java -jar bugfix.jar in out`) |
 | `src/local/pokewilds/bugfix/Hooks.java` | runtime support the patched classes call (per-floor maps, saving, egg floor) |
+| `Patch PokeWilds (Windows, drag and drop).bat` | drag-and-drop launcher for the patcher on Windows |
 | `tools/RelocateAsm.java` | copies ASM into the bugfix package at build time |
 | `tests/` | the checks run by `test.sh` |
 
