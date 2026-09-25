@@ -80,10 +80,14 @@ public final class PatchJar {
                     throw new PatchException("the jar is signed (" + n + "); patching would invalidate the signature");
             }
             // 2. copy every entry, patching the game classes
+            System.out.println("The jar is valid PokeWilds 0.8.11. Patching now: the whole jar is rewritten, which can take a minute or two...");
+            final int total = zin.size();
+            int done = 0;
             File tmp = new File(outFile.getPath() + ".tmp");
             try (ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(tmp))) {
                 for (Enumeration<? extends ZipEntry> en = zin.entries(); en.hasMoreElements();) {
                     ZipEntry e = en.nextElement();
+                    if (++done % 10000 == 0) System.out.println("  " + done + " of " + total + " files copied...");
                     ZipEntry ne = new ZipEntry(e.getName());
                     ne.setTime(e.getTime());
                     if (e.isDirectory()) { zout.putNextEntry(ne); zout.closeEntry(); continue; }
