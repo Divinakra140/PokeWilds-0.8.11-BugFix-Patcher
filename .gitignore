@@ -1,3 +1,7 @@
 build/
 dist/
 *.jar
+
+# macOS sidecar and Finder files: never commit these
+._*
+.DS_Store
