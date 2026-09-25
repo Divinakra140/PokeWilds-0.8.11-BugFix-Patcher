@@ -98,7 +98,7 @@ public final class PatchJar {
             patch(jar, tmp, sprites, hooh, floors, eggs);
             if (backup.exists()) {
                 // An earlier backup is only reused if it is the very same jar, so nothing is ever overwritten.
-                if (!sha256(java.nio.file.Files.readAllBytes(backup.toPath())).equals(sha256(java.nio.file.Files.readAllBytes(jar.toPath()))))
+                if (!sha256(backup).equals(sha256(jar)))
                     throw new PatchException("the backup file " + backup.getName() + " already exists and is a different jar. Move it away first, so it is not overwritten.");
             } else {
                 java.nio.file.Files.move(jar.toPath(), backup.toPath());
@@ -166,9 +166,19 @@ public final class PatchJar {
                     ZipEntry ne = new ZipEntry(e.getName());
                     ne.setTime(e.getTime());
                     if (e.isDirectory()) { zout.putNextEntry(ne); zout.closeEntry(); continue; }
-                    byte[] data = read(zin, e);
                     String n = e.getName();
-                    if (n.startsWith("com/pkmngen/game/") && n.endsWith(".class")) {
+                    if (!(n.startsWith("com/pkmngen/game/") && n.endsWith(".class"))) {
+                        // Everything else (sounds, images, ...) is copied as a stream, so memory use stays small.
+                        zout.putNextEntry(ne);
+                        try (InputStream in = zin.getInputStream(e)) {
+                            byte[] buf = new byte[65536];
+                            for (int r; (r = in.read(buf)) > 0; ) zout.write(buf, 0, r);
+                        }
+                        zout.closeEntry();
+                        continue;
+                    }
+                    byte[] data = read(zin, e);
+                    {
                         classes++;
                         String cn = n.substring(0, n.length() - 6);
                         byte[] r = BugFixAgent.transformClass(cn, data, sprites, hooh, floors, eggs, applied);
@@ -221,7 +231,7 @@ public final class PatchJar {
         System.out.println("Patch fingerprint: " + fp + (all && !REFERENCE_FINGERPRINT.equals("TBD")
                 ? (fp.equals(REFERENCE_FINGERPRINT) ? "  (identical to the reference build)" : "  (DIFFERS from the reference build)") : ""));
         if (!outFile.getName().endsWith(".bugfix-tmp"))
-            System.out.println("Wrote " + outFile + "  (file sha256 " + sha256(java.nio.file.Files.readAllBytes(outFile.toPath())) + ")");
+            System.out.println("Wrote " + outFile + "  (file sha256 " + sha256(outFile) + ")");
     }
 
     /** What a complete patch of PokeWilds 0.8.11 looks like. */
@@ -299,6 +309,18 @@ public final class PatchJar {
             int n = e.getValue().length;
             md.update(new byte[] {(byte) (n >>> 24), (byte) (n >>> 16), (byte) (n >>> 8), (byte) n});
             md.update(e.getValue());
+        }
+        StringBuilder sb = new StringBuilder();
+        for (byte b : md.digest()) sb.append(String.format("%02x", b));
+        return sb.toString();
+    }
+
+    /** SHA-256 of a file, read as a stream (the jar is far too big to hold in memory on small devices). */
+    static String sha256(File f) throws Exception {
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        try (InputStream in = new java.io.FileInputStream(f)) {
+            byte[] buf = new byte[65536];
+            for (int r; (r = in.read(buf)) > 0; ) md.update(buf, 0, r);
         }
         StringBuilder sb = new StringBuilder();
         for (byte b : md.digest()) sb.append(String.format("%02x", b));
