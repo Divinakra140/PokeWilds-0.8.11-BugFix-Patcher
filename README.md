@@ -1,6 +1,6 @@
-# PokeWilds 0.8.11 BugFix
+# PokeWilds 0.8.11 Bug Fix Patcher
 
-**Release 0.8.12**: an unofficial community bug-fix release that continues after SheerSt's PokeWilds 0.8.11. It is made by patching the official 0.8.11 game with this tool, and it is not an official release by SheerSt.
+**Version 1.0**: an unofficial community tool that fixes bugs in SheerSt's PokeWilds 0.8.11. It works by patching the official 0.8.11 game, and it is not an official release by SheerSt.
 
 Fixes four bugs in [PokeWilds](https://github.com/SheerSt/pokewilds) 0.8.11. You run it once on your own copy of the
 game, and the game plays the same afterwards, minus the bugs. It does not include any game files.
@@ -21,7 +21,7 @@ game, and the game plays the same afterwards, minus the bugs. It does not includ
 
 You need Java, the same one you use to run the game.
 
-1. **Download** `PokeWilds-0.8.12-BugFix.zip` from the [Releases](../../releases) page and unzip it anywhere.
+1. **Download** `PokeWilds-BugFix-v1.0.zip` from the [Releases](../../releases) page and unzip it anywhere.
 2. **Get the official game.** Download `pokewilds-otherplatforms.zip` from the
    [PokeWilds v0.8.11 release](https://github.com/SheerSt/pokewilds/releases/tag/v0.8.11) and unzip it, or use the
    `app\pokewilds.jar` from a copy of the game you already have. It must be the original, unmodified 0.8.11 jar.
