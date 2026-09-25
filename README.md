@@ -24,9 +24,10 @@ You need Java, the same one you use to run the game.
 2. **Get the official game.** Download `pokewilds-otherplatforms.zip` from the
    [PokeWilds v0.8.11 release](https://github.com/SheerSt/pokewilds/releases/tag/v0.8.11) and unzip it, or use a copy of
    the game you already have. It must be the original, unmodified 0.8.11 game.
-3. **Unzip the contents of the patcher zip straight into the game's `app` folder**, the folder that contains
-   `pokewilds.jar`. You should end up with `bugfix.jar`, the two `.bat` files and the README sitting right next to
-   `pokewilds.jar`.
+3. **Unzip the contents of the patcher zip straight into the folder that contains `pokewilds.jar`.** That's the `app`
+   folder if you have the Windows version of the game, or the main game folder (next to `linux-launcher`) if you
+   downloaded `pokewilds-otherplatforms.zip`. You should end up with `bugfix.jar`, the two `.bat` files and the README
+   sitting right next to `pokewilds.jar`.
 4. **Drag `pokewilds.jar` onto `Patch PokeWilds.bat`.** It takes a minute or two.
    The window ends with `Done. pokewilds.jar is now the patched game.`
 5. **Play as usual.** Your original is kept next to it as `pokewilds-original.jar.bak`.

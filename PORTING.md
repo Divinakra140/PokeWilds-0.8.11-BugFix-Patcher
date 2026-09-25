@@ -24,7 +24,8 @@ verify it), with one extra step.
 ## Steps
 
 1. Get the official 0.8.11 `pokewilds.jar` and verify it the way you already do. The release asset is
-   `pokewilds-otherplatforms.zip`, SHA-256 `5c0aca7f447ee6b4ed587f3ab2cefaf445219059d790862a7121c56a72fb22ba`.
+   `pokewilds-otherplatforms.zip`, SHA-256 `5c0aca7f447ee6b4ed587f3ab2cefaf445219059d790862a7121c56a72fb22ba`. The
+   jar inside it (`pokewilds-v0.8.11-otherplatforms/pokewilds.jar`) is the one I tested with.
 2. Patch it into a new file. Two file names means the input is left alone:
 
    ```sh
@@ -52,6 +53,9 @@ bound to it.
 | Time | about 20 seconds on a desktop. I have not measured phones |
 
 The patcher streams the jar, so it doesn't hold the game in memory.
+
+The official zip's own `linux-launcher` and `mac-launcher.template` just run `java -jar pokewilds.jar`. If you patch in
+place (`java -jar bugfix.jar pokewilds.jar`) the jar keeps its name, so those launchers keep working unchanged.
 
 ## What can go wrong
 
@@ -92,8 +96,8 @@ The save format doesn't change. Details for each fix are in the repository READM
 
 ## What I have tested
 
-I played the patched game on Windows, on a save with a 20+ floor tower, and ran automated checks against the official
-jar (see the README). I have not tested Android, ROCKNIX or anything else, so please tell me what you find.
+I played the patched game on Windows, on a save with a 20+ floor tower, and ran automated checks against the jar from
+the official `pokewilds-otherplatforms.zip` (see the README). I have not tested Android, ROCKNIX or anything else, so please tell me what you find.
 
 ## Questions and bug reports
 

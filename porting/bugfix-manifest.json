@@ -14,7 +14,8 @@
       "com/pkmngen/game/Pokemon.class": "84daae5ce3b6a53341ef20a213c32b7d25991c4a2fa878c1896a129a59bdc6e4"
     },
     "tested_jar_sha256": "0a72e17bf5cc3bd14ac97a6d001fe16c32cf8bd2d6caf1271bb2d3f234a6f248",
-    "note": "The patcher accepts a jar if these two class files match. tested_jar_sha256 is the whole jar the fixes were tested with."
+    "tested_jar_note": "This is the SHA-256 of pokewilds-v0.8.11-otherplatforms/pokewilds.jar inside the official pokewilds-otherplatforms.zip.",
+    "note": "The patcher accepts a jar if the two class files above match."
   },
   "tool": {
     "file": "bugfix.jar",
