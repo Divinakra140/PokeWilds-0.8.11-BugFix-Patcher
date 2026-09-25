@@ -55,8 +55,10 @@ the same spot when you saved, one is saved a tile or two away on its own floor, 
 **What if it says "already patched" or "does not match PokeWilds 0.8.11"?** It only accepts the original 0.8.11 jar.
 "Already patched" means it has been done. Use the restore step first if you want to start again.
 
-**Does it work on Android or ROCKNIX?** It patches the same `pokewilds.jar` those ports use, but I have only
-tested it on desktop.
+**Does it work on ROCKNIX Linux?** Yes, just patch the .jar as usual, and then drag in the new .jar into your apps folder of your port game directory folder within ROCKNIX, replacing the original.
+
+**Does it work on Android?** It patches the same `pokewilds.jar` the Android port uses, but I have only tested it on
+desktop.
 
 **Can I use other add-ons with it?** Yes. A patched jar behaves like a normal jar, so add-ons that attach with
 `-javaagent` still work on top of it.
