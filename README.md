@@ -20,7 +20,7 @@ By Divinakra
 
 You need Java, the same one you use to run the game.
 
-1. **Download** PokeWilds-BugFix-v1.0.zip from the [Releases](../../releases) page.
+1. **Download** [PokeWilds-BugFix-v1.0.zip](https://github.com/Divinakra140/PokeWilds-0.8.11-BugFix-Patcher/releases/download/1.0/PokeWilds-BugFix-v1.0.zip).
 2. **Get the official game.** Download pokewilds-otherplatforms.zip from the
    [PokeWilds v0.8.11 release](https://github.com/SheerSt/pokewilds/releases/tag/v0.8.11) and unzip it, or use a copy of
    the game you already have. It must be the original, unmodified 0.8.11 game.
