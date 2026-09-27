@@ -57,8 +57,9 @@ the same spot when you saved, one is saved a tile or two away on its own floor, 
 
 **Does it work on ROCKNIX Linux?** Yes, just patch the .jar as usual, then simply replace your pokewilds.jar located in the ROCKNIX ports > pokewilds > bin > app folder with your new patched pokewilds.jar that you already patched on your computer.
 
-**Does it work on Android?** It patches the same pokewilds.jar the Android port uses. I have tested it on Windows
-and ROCKNIX, but not on Android yet.
+**Does it work on Android?** Yes. I have tested the patcher on Android and it works. The current build of Android
+PokeWilds by NoNoseYaKnow has the patcher built in, so you can get the fixes by installing it from
+[his releases page](https://github.com/NoNoseYaKnow/Pokewilds-Android/releases).
 
 **Can I use other add-ons with it?** Yes. A patched jar behaves like a normal jar, so add-ons that attach with
 -javaagent still work on top of it.
@@ -114,7 +115,7 @@ I played through the fixes on desktop (Windows, stock 0.8.11 jar) on a save with
 roaming monsters: collisions on every floor behave like a one-floor game, saving and reloading keeps each floor's
 monsters, Ride/Cut/Build face the right way, and the Ho-Oh error is gone. Overhead is small: about 0.2 ms extra per
 frame for a frame's worth of monster scans (300 monsters), measured in isolation. I have also run it on ROCKNIX,
-where it works. I have not tested other platforms such as Android.
+where it works. I have also tested it on Android, where it works too.
 
 ## Layout
 

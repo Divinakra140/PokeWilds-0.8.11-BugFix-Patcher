@@ -119,7 +119,7 @@ The save format doesn't change.
 ## What I have tested
 
 I played the patched game on Windows, on a save with a 20+ floor tower, and ran automated checks against the jar from
-the official `pokewilds-otherplatforms.zip` (see the README). I have also run it on ROCKNIX and it works. I have not tested Android or anything else, so please tell me what you find.
+the official `pokewilds-otherplatforms.zip` (see the README). I have also run it on ROCKNIX and on Android, and it works on both. I have not tested anything else, so please tell me what you find.
 
 ## Questions and bug reports
 
